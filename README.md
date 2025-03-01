@@ -2,27 +2,30 @@ Research Question 1: Which U.S. metropolitan areas have a low density of General
 Question 1.1: What is the count of General Medical and Surgical Hospitals in each metropolitan area?
 By city:
 Query:
+```
 SELECT city, COUNT(*) as hospital_count
 FROM team12-fa24-mgmt58200-final.safegraph.places
 WHERE naics_code = 622110 -- NAICS code for General Medical and Surgical Hospitals
 GROUP BY city
 ORDER BY hospital_count DESC;
-
+```
 Result:
 Highest count is 308 in Cincinnati and 1 being the lowest count for multiple cities
 By Region
-Query:
+```
+###Query:
 SELECT region, COUNT(*) as hospital_count
 FROM team12-fa24-mgmt58200-final.safegraph.places
 WHERE naics_code = 622110 -- NAICS code for General Medical and Surgical Hospitals
 GROUP BY region
 ORDER BY hospital_count DESC;
-
+```
 Result
 Missouri being highest with 846 hospitals and Delaware is lowest with 8 hospitals (excluding United States Virgin Islands and GUAM being even lower with 1)
 Question 1.2: What is the ratio of hospitals to population in each metropolitan area?
 By city:
-Query:
+```
+###Query:
 WITH city_data AS (
   SELECT p.city,COUNT(DISTINCT p.safegraph_place_id) as hospital_count, SUM(DISTINCT c.pop_total) as total_population
   FROM team12-fa24-mgmt58200-final.safegraph.places p
@@ -37,10 +40,13 @@ SELECT city,hospital_count,total_population,
 FROM city_data
 WHERE total_population > 1000
 ORDER BY population_per_hospital DESC;
+```
 Result:
 Riverview has the highest ratio of population to hospital at 7371 individuals/hospital and Crestview Hills having the lowest ratio of population to hospital 98 individuals/hospital
+
 By Region
-Query:
+```
+###Query:
 WITH region_data AS (
   SELECT p.region,COUNT(DISTINCT p.safegraph_place_id) as hospital_count, SUM(DISTINCT c.pop_total) as total_population
   FROM team12-fa24-mgmt58200-final.safegraph.places p
@@ -55,11 +61,12 @@ SELECT region,hospital_count,total_population,
 FROM region_data
 WHERE total_population > 1000
 ORDER BY population_per_hospital DESC;
-
+```
 Result:
 As a region, New Hampshire has the highest ratio of population to hospital at 1599 individuals/hospital and Missouri has the lowest ratio of population to hospital 98 individuals/hospital
 Question 1.3: What is the average distance between hospitals in each metropolitan area?
 By city
+```
 SELECT city, 
        AVG(distance) as avg_distance_km
 FROM (
@@ -72,10 +79,11 @@ FROM (
 ) subquery
 GROUP BY city
 ORDER BY avg_distance_km DESC;
-
+```
 Result:
 Palmer has the highest average distance between hospital at 5328 km and Chicora having the lowest average distance between hospital at 0.0004 km
 By Region
+```
 SELECT region, AVG(distance) as avg_distance_km
 FROM (
     SELECT p1.region,p1.safegraph_place_id,p2.safegraph_place_id,
@@ -87,11 +95,12 @@ FROM (
 ) subquery
 GROUP BY region
 ORDER BY avg_distance_km DESC;
-
+```
 Result:
 As a region, Maine (ME) has the highest average distance between hospital at 3247 km and Ohio having the lowest average distance between hospital at 36.7 km (excluding Puerto Rico and Hawai)
 Question 1.4: What is the trend of hospital visits over time in areas with low hospital density?
 By city
+```
 WITH low_density_cities AS (
   SELECT city
   FROM team12-fa24-mgmt58200-final.safegraph.places
@@ -107,10 +116,11 @@ WHERE p.naics_code = 622110
   AND p.city IN (SELECT city FROM low_density_cities)
 GROUP BY p.city
 ORDER BY avg_weekly_visits DESC;
-
+```
 Result:
 Tuscaloosa has the highest average weekly visit at 19058 and Dewitt having the lowest average weekly visit at 1
 By Region
+```
 WITH low_density_cities AS (
   SELECT region
   FROM team12-fa24-mgmt58200-final.safegraph.places
@@ -126,12 +136,13 @@ WHERE p.naics_code = 622110
   AND p.region IN (SELECT region FROM low_density_cities)
 GROUP BY p.region
 ORDER BY avg_weekly_visits ASC;
-
+```
 Result:
 As a region, Nevada has the highest average weekly visit at 3156 vists and Montana has the lowest average weekly visit at 580 visits (excluding US Virgin Islands)
 Question 1.5: What is the average dwell time in hospitals in low-density areas compared to high-density areas?
 By city
 Query:
+```
 WITH hospital_density AS (
   SELECT city, COUNT(*) as hospital_count,CASE WHEN COUNT(*) < 5 THEN 'Low' ELSE 'High' END as density
   FROM team12-fa24-mgmt58200-final.safegraph.places
@@ -144,7 +155,7 @@ JOIN team12-fa24-mgmt58200-final.safegraph.places p ON hd.city = p.city
 JOIN team12-fa24-mgmt58200-final.safegraph.visits v ON p.safegraph_place_id = v.safegraph_place_id
 WHERE p.naics_code = 622110
 GROUP BY hd.density;
-
+```
 Results
 density	avg_median_dwell	
 1	High	128.89315541031226
@@ -152,6 +163,7 @@ density	avg_median_dwell
 
 Average Dwell Time By city
 Query:
+```
 WITH hospital_density AS (
   SELECT city, COUNT(*) as hospital_count,CASE WHEN COUNT(*) < 5 THEN 'Low' ELSE 'High' END as density
   FROM team12-fa24-mgmt58200-final.safegraph.places p
@@ -165,11 +177,12 @@ JOIN team12-fa24-mgmt58200-final.safegraph.visits v ON p.safegraph_place_id = v.
 WHERE p.naics_code = 622110
 GROUP BY city 
 ORDER BY city ASC;
-
+```
 Result:
 Gibson City has the highest average median dwell time at 900 minutes and Lake Success having the lowest average median dwell time at 5 minutes
 Average Dwell Time By state
 Query:
+```
 WITH hospital_density AS (
   SELECT region, COUNT(*) as hospital_count,CASE WHEN COUNT(*) < 5 THEN 'Low' ELSE 'High' END as density
   FROM team12-fa24-mgmt58200-final.safegraph.places p
@@ -183,13 +196,15 @@ JOIN team12-fa24-mgmt58200-final.safegraph.visits v ON p.safegraph_place_id = v.
 WHERE p.naics_code = 622110
 GROUP BY region 
 ORDER BY avg_median_dwell ASC;
+```
 Result:
 As a region, Utah has the lowest average median dwell time at 82 minutes and Wisconsin has the highest average median dwell time at 155 minutes
 
 Research Question 4: Which of these metro areas have a large number of households with incomes over $200,000?
 Question 4.1: What is the count of households with incomes over $200,000 in each metropolitan area with low hospital density?
 By city
-<Query:
+Query:
+```
 WITH low_hospital_density_cities AS (
   SELECT city
   FROM team12-fa24-mgmt58200-final.safegraph.places
@@ -208,10 +223,11 @@ WHERE p.city IN (SELECT city FROM low_hospital_density_cities)
   AND p.naics_code = 622110
 GROUP BY p.city
 ORDER BY households_over_200k ASC;
-
+```
 Result:
 Sugar Land is the city with low hospital density but high number of households whose yearly income is above 200k with 3920 households with income above 200k. Jeffersonville is a city with 2 hospitals but 0 households with income greater than 200k
 By Region
+```
 WITH low_hospital_density_cities AS (
   SELECT region
   FROM team12-fa24-mgmt58200-final.safegraph.places
@@ -230,12 +246,13 @@ WHERE p.region IN (SELECT region FROM low_hospital_density_cities)
   AND p.naics_code = 622110
 GROUP BY p.region
 ORDER BY households_over_200k ASC;
-
+```
 Result:
 In the regions with low hospital density, Vermont is the region with low hospital density with only 6 hospitals and low number of households having yearly income is above 200k with 864 households(excluding DC and PR). Utah is the region with a relatively high number of hospital count with 38 hospitals and the highest number of household having income greater than 200k with 6476 households.
 Question 4.2: What is the count of households with incomes over $200,000 in each metropolitan area?
 By city
 Query:
+```
 SELECT p.city, SUM(c.inc_gte200) as high_income_households
 FROM team12-fa24-mgmt58200-final.safegraph.places p
 JOIN team12-fa24-mgmt58200-final.safegraph.visits v ON p.safegraph_place_id = v.safegraph_place_id
@@ -243,7 +260,7 @@ JOIN team12-fa24-mgmt58200-final.safegraph.cbg_demographics c ON v.poi_cbg = c.c
 GROUP BY p.city
 ORDER BY high_income_households DESC
 LIMIT 10;
-
+```
 Result:
 
 Row	city	high_income_households
@@ -260,6 +277,7 @@ Row	city	high_income_households
 
 By Region
 Query:
+```
 SELECT p.region, SUM(c.inc_gte200) as high_income_households
 FROM team12-fa24-mgmt58200-final.safegraph.places p
 JOIN team12-fa24-mgmt58200-final.safegraph.visits v ON p.safegraph_place_id = v.safegraph_place_id
@@ -267,7 +285,7 @@ JOIN team12-fa24-mgmt58200-final.safegraph.cbg_demographics c ON v.poi_cbg = c.c
 GROUP BY p.region
 ORDER BY high_income_households DESC
 LIMIT 10;
-
+```
 Results:
 Row	region	high_income_households
 1	NY	53584544
@@ -284,6 +302,7 @@ Row	region	high_income_households
 Question 4.3: What is the percentage of high-income households in each metropolitan area?
 By City
 Query:
+```
 WITH city_income_data AS (
   SELECT p.city, SUM(c.inc_gte200) as high_income_households,SUM(c.pop_total) as total_households
   FROM team12-fa24-mgmt58200-final.safegraph.places p
@@ -296,7 +315,7 @@ FROM city_income_data
 WHERE total_households > 1000  
 ORDER BY high_income_percentage DESC
 LIMIT 10;
-
+```
 Results:
 
 city	high_income_households	total_households	high_income_percentage
@@ -313,6 +332,7 @@ Weddington	4068	19056	21.347607052896727
 
 By Region
 Query:
+```
 WITH region_income_data AS (
   SELECT p.region, SUM(c.inc_gte200) as high_income_households,SUM(c.pop_total) as total_households
   FROM team12-fa24-mgmt58200-final.safegraph.places p
@@ -325,7 +345,7 @@ FROM region_income_data
 WHERE total_households > 1000  
 ORDER BY high_income_percentage DESC
 LIMIT 10;
-
+```
 region	high_income_households	total_households	high_income_percentage
 CT	12328	126160	9.7717184527584013
 DC	2955930	37392835	7.9050705837094188
@@ -341,6 +361,7 @@ NH	2900765	75805927	3.8265675453055272
 Question 4.4: What is the number of hospitals in areas with a high percentage of high-income households?
 By City:
 Query:
+```
 WITH high_income_cities AS (
   SELECT p.city,SUM(c.inc_gte200) AS high_income_households,SUM(c.pop_total) AS total_population,
     ROUND(SAFE_DIVIDE(SUM(c.inc_gte200) * 100.0, SUM(c.pop_total)),2) AS high_income_percentage
@@ -357,7 +378,7 @@ JOIN team12-fa24-mgmt58200-final.safegraph.places p ON h.city = p.city
 WHERE p.naics_code = 622110
 GROUP BY h.city, h.high_income_percentage
 ORDER BY hospital_count ASC;
-
+```
 Results:
 city	high_income_percentage	hospital_count
 Nichols Hills	11.66	1
@@ -409,6 +430,7 @@ Birmingham	13.5	33
 
 By Region:
 Query:
+```
 WITH high_income_regions AS (
   SELECT p.region,SUM(c.inc_gte200) AS high_income_households,SUM(c.pop_total) AS total_population,
     ROUND(SAFE_DIVIDE(SUM(c.inc_gte200) * 100.0, SUM(c.pop_total)),2) AS high_income_percentage
@@ -425,7 +447,7 @@ JOIN team12-fa24-mgmt58200-final.safegraph.places p ON h.region = p.region
 WHERE p.naics_code = 622110
 GROUP BY h.region, h.high_income_percentage
 ORDER BY hospital_count ASC;
-
+```
 Result:
 region	high_income_percentage	hospital_count
 DE	2.43	8
